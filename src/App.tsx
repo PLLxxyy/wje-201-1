@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { HomePage } from './pages/HomePage';
 import { DetailPage } from './pages/DetailPage';
 import { FavoritesPage } from './pages/FavoritesPage';
+import type { RatingsMap, Rating } from './types';
 
 type Page = { type: 'home' } | { type: 'detail'; id: string } | { type: 'favorites' };
 
 const FAVORITES_KEY = 'cocktail-favorites';
+const RATINGS_KEY = 'cocktail-ratings';
 
 function loadFavorites(): string[] {
   try {
@@ -20,18 +22,40 @@ function saveFavorites(favs: string[]) {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favs));
 }
 
+function loadRatings(): RatingsMap {
+  try {
+    const raw = localStorage.getItem(RATINGS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveRatings(ratings: RatingsMap) {
+  localStorage.setItem(RATINGS_KEY, JSON.stringify(ratings));
+}
+
 export default function App() {
   const [page, setPage] = useState<Page>({ type: 'home' });
   const [favorites, setFavorites] = useState<string[]>(loadFavorites);
+  const [ratings, setRatings] = useState<RatingsMap>(loadRatings);
 
   useEffect(() => {
     saveFavorites(favorites);
   }, [favorites]);
 
+  useEffect(() => {
+    saveRatings(ratings);
+  }, [ratings]);
+
   const toggleFavorite = useCallback((id: string) => {
     setFavorites(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id],
     );
+  }, []);
+
+  const setRating = useCallback((id: string, rating: Rating) => {
+    setRatings(prev => ({ ...prev, [id]: rating }));
   }, []);
 
   const navigate = useCallback((p: Page) => {
@@ -75,6 +99,7 @@ export default function App() {
           favorites={favorites}
           toggleFavorite={toggleFavorite}
           openDetail={(id) => navigate({ type: 'detail', id })}
+          ratings={ratings}
         />
       )}
 
@@ -84,6 +109,8 @@ export default function App() {
           isFavorite={favorites.includes(page.id)}
           toggleFavorite={toggleFavorite}
           goBack={() => navigate({ type: 'home' })}
+          rating={ratings[page.id]}
+          setRating={(rating) => setRating(page.id, rating)}
         />
       )}
 
@@ -93,6 +120,7 @@ export default function App() {
           toggleFavorite={toggleFavorite}
           openDetail={(id) => navigate({ type: 'detail', id })}
           goHome={() => navigate({ type: 'home' })}
+          ratings={ratings}
         />
       )}
     </>
