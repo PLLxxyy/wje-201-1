@@ -9,9 +9,10 @@ interface Props {
   goBack: () => void;
   rating?: Rating;
   setRating: (rating: Rating) => void;
+  removeRating: () => void;
 }
 
-export function DetailPage({ id, isFavorite, toggleFavorite, goBack, rating, setRating }: Props) {
+export function DetailPage({ id, isFavorite, toggleFavorite, goBack, rating, setRating, removeRating }: Props) {
   const cocktail = cocktails.find(c => c.id === id);
   const [editScore, setEditScore] = useState<number>(0);
   const [editComment, setEditComment] = useState<string>('');
@@ -81,9 +82,7 @@ export function DetailPage({ id, isFavorite, toggleFavorite, goBack, rating, set
     setEditScore(0);
     setEditComment('');
     setIsEditing(false);
-    if (rating) {
-      setRating({ score: 0, comment: '', updatedAt: Date.now() });
-    }
+    removeRating();
   };
 
   const displayStars = (score: number) => '★'.repeat(score) + '☆'.repeat(5 - score);

@@ -58,6 +58,14 @@ export default function App() {
     setRatings(prev => ({ ...prev, [id]: rating }));
   }, []);
 
+  const removeRating = useCallback((id: string) => {
+    setRatings(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  }, []);
+
   const navigate = useCallback((p: Page) => {
     setPage(p);
     window.scrollTo(0, 0);
@@ -111,6 +119,7 @@ export default function App() {
           goBack={() => navigate({ type: 'home' })}
           rating={ratings[page.id]}
           setRating={(rating) => setRating(page.id, rating)}
+          removeRating={() => removeRating(page.id)}
         />
       )}
 
